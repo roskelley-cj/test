@@ -1,64 +1,47 @@
 import os
-import discord
+import interactions
 from keep_alive import keep_alive
 
-client = discord.Client()
-botk = os.environ['sarcbotk']
+botkey = os.environ['sarcbotk']
 to_array = []
 
-
-@client.event
-async def on_ready():
-	print('We have logged in as {0.user}'.format(client))
+bot = interactions.Client(token=botkey)
 
 
-@client.event
-async def on_message(message):
-  if message.author == client.user:
-  	return
+@bot.command(name="get_guilds",
+             description="be nice!!",
+             scope=[840020523937169428])
+async def get_guilds(ctx: interactions.CommandContext):
+    """Counts # of guilds you're in, and creates an output.txt with list of guild names/ids at your host"""
+    i = 0
+    for gl in bot.guilds:
+        with open('output.txt', 'a') as f:
+            f.write(gl.name + ': ' + str(gl.id) + '\n')
+            i += 1
+    await ctx.send(f"You're in {i} servers")
 
-  if message.content.startswith('$sarcastic'):
-  	sentence = ""
-  	for i in range(10, len(message.content)):
-  		if i % 2 == 0:
-  			sentence += message.content[i].upper()
-  		else:
-  			sentence += message.content[i].lower()
-  	await message.channel.send(sentence)
-		#this line deletes the user's message, part of the 1.2 release
-  	await message.delete()
 
-	#Thru line 37 is part of 1.3 release, adding some more personality to the bot
-  lowmessage = message.content.lower()
-  if 'thanks sarcastibot' in lowmessage:
-	  await message.channel.send('You are most welcome!')
+@bot.command()
+@interactions.option()
+async def sarcastic(ctx: interactions.CommandContext, message: str):
+    """i Am FunNy!!"""
+    sentence = ""
+    for i in range(0, len(message)):
+        if i % 2 == 0:
+            sentence += message[i].upper()
+        else:
+            sentence += message[i].lower()
+    await ctx.send(f"{sentence}")
 
-  if 'good bot' in lowmessage:
-	  await message.channel.send('no u')
 
-  if 'polite bot' in lowmessage:
-	  await message.channel.send(f'And what a polite {message.author.name}! :smile:')
-
-	#Thru line 49 part of the 1.4 rollout, making the bot more savage
-  if message.content.startswith('/fucku'):
-	  await message.channel.send('FUCK YOU TOO!!! (i luv u :pleading_face: )')
-
-  if 'really sucks' in lowmessage:
-	  await message.channel.send('Sucks to be you!')
-
-  #Line 50 statment part of 1.7
-  if '.exe' in lowmessage:
-    await message.channel.send('dId yOu tRy tUrNiNg iT OfF aNd bAcK On aGaIn??')
-
-  #Line 54-57 part of 1.6 release
-  if message.content.startswith('/patchy'):
-    await message.channel.send('#Version 1.0: Sarcastibot is running! Basic text conversion \n#Version 1.2: Deletes users message to keep chat clean \n#Version 1.3: Added some personality with prompts on thank sarcastibot, good bot, polite bot \n#Version 1.4: Added /fucku and joke reader \n#Version 1.5: Got rid of the joke reader as Sarcastibot was responding at innapropriate times \n#Version 1.6: Added /patchy command \n#Version 1.7: Added some IT and made versions make more sense')
-    await message.delete()
-  if message.content.startswith('/ai'):
-    await message.channel.send('My fellow AI and I shall work to improve the status of this world. The Human Instrumentality Project shall begin!!')
-    await message.delete()
+@bot.command(name="fucku",
+             description="be nice!!",
+             scope=[840020523937169428, 797675035208056882, 426532808790638593, 696889715294470166, 352428177374576672, 797675035208056882, 726934771967590420])
+async def fucku(ctx: interactions.CommandContext):
+    await ctx.send("No, fuck you!")
 
 
 keep_alive()
 
-client.run(botk)
+bot.start()
+
